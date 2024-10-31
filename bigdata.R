@@ -360,8 +360,9 @@ Test1 = rbind(df1_ma_test_1, df1_ma_test_0)   # dp1和dp3有、沒有交集的�
 # model-lm
 model1_lm = lm(finalscore ~ testscore+learningmean+indp3, data=Train)
 # summary(model1)
-Train$predict_lm = predict(model1) 
+Train$predict_lm = predict(model1_lm) 
 mse_lm = mean((Train$predict-Train$finalscore)^2)
+mse_lm
 
 # knn
 model2_knn = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=7)
