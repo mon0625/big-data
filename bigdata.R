@@ -305,12 +305,6 @@ df2_en_3 = prac2_en[prac2_en$user_sn %in% prac3_en$user_sn, ]
 nrow(df2_en_3)
 # ---------------------------↑ dp2, dp3 ↑---------------------------
 
-# ---------------------------↓ dp2, dp3 ↓---------------------------
-# (dp2, dp3) 英語 [dp2]且[dp3] [1]
-df2_en_3 = prac2_en[prac2_en$user_sn %in% prac3_en$user_sn, ]
-nrow(df2_en_3)
-# ---------------------------↑ dp2, dp3 ↑---------------------------
-
 # ---------------------------↓ dp1, dp2, dp3 ↓---------------------------
 # (dp1, dp2, dp3) 英語 [dp1測驗且影片]且[dp2]且[dp3] [0]
 df1_en_PV$indp23 = apply(df1_en_PV, 1, function(row) row['indp2']==1 & row['indp3']==1)
