@@ -1,4 +1,5 @@
 library(dplyr)
+library(kknn)
 user = read.csv('user_data.csv')
 dp1_exam = read.csv('dp001_exam.csv')
 dp1_prac = read.csv('dp001_prac.csv')
@@ -342,6 +343,7 @@ sum(video_en$indp23)
 ### ↑ 交集處理 ↑ ###
 
 # 建模
+set.seed(1)
 df1_ma1 = df1_ma_PV[df1_ma_PV$indp3==1, ] # dp1, dp3交集
 s = sample(1:nrow(df1_ma1), 6)
 df1_ma_train_1 = df1_ma1[s, ] # 有交集train
@@ -355,8 +357,17 @@ Train = rbind(df1_ma_train_1, df1_ma_train_0) # dp1和dp3有、沒有交集的�
 Test1 = rbind(df1_ma_test_1, df1_ma_test_0)   # dp1和dp3有、沒有交集的測試集之組合
 # Test2 = Test1+只有dp3，但是有資料缺失項
 
-# model
-model1 = lm(Train$finalscore ~ Train$testscore+Train$learningmean+Train$indp3)
-summary(model1)
+# model-lm
+model1_lm = lm(finalscore ~ testscore+learningmean+indp3, data=Train)
+# summary(model1)
+Train$predict_lm = predict(model1) 
+mse_lm = mean((Train$predict-Train$finalscore)^2)
+
+# knn
+model2_knn = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=7)
+# summary(model2_knn)
+Train$predict_knn = fitted(model2_knn)
+mse_knn = mean((Train$predict_knn-Train$finalscore)^2)
+
 
 
