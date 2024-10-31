@@ -74,49 +74,49 @@ prac3_ma$finalscore = user[user$user_sn %in% prac3_ma$user_sn, 'math_score']    
 
 # ============================↓ picture1 (各平台測驗) ↓============================
 # dp1 測驗成績箱型圖
-png("dp1_prac.png", width = 800, height = 600)
+png("pic/dp1_prac.png", width = 800, height = 600)
 par(mfrow=c(1, 3))
-boxplot(prac1_ch$testscore, ylim=c(0, 100), main='平台1國語測驗成績')
-boxplot(prac1_en$testscore, ylim=c(0, 100), main='平台1英語測驗成績')
-boxplot(prac1_ma$testscore, ylim=c(0, 100), main='平台1數學測驗成績')
+boxplot(prac1_ch$testscore, ylim=c(0, 100), main='平台1國語測驗成績', cex.main=3, cex.axis=2)
+boxplot(prac1_en$testscore, ylim=c(0, 100), main='平台1英語測驗成績', cex.main=3, cex.axis=2)
+boxplot(prac1_ma$testscore, ylim=c(0, 100), main='平台1數學測驗成績', cex.main=3, cex.axis=2)
 dev.off()
 
 # dp2 測驗成績箱型圖
-png("dp2_prac.png", width = 800, height = 600)
+png("pic/dp2_prac.png", width = 800, height = 600)
 par(mfrow=c(1, 2))
-boxplot(prac2_ch$testscore, ylim=c(0, 100), main='平台2國語測驗成績')
-boxplot(prac2_en$testscore, ylim=c(0, 100), main='平台2英語測驗成績')
+boxplot(prac2_ch$testscore, ylim=c(0, 100), main='平台2國語測驗成績', cex.main=2.5, cex.axis=2)
+boxplot(prac2_en$testscore, ylim=c(0, 100), main='平台2英語測驗成績', cex.main=2.5, cex.axis=2)
 dev.off()
 
 # dp3 測驗成績箱型圖
-png("dp3_prac.png", width = 800, height = 600)
+png("pic/dp3_prac.png", width = 800, height = 600)
 par(mfrow=c(1, 2))
-boxplot(prac3_en$testscore, ylim=c(0, 100), main='平台3英語測驗成績')
-boxplot(prac3_ma$testscore, ylim=c(0, 100), main='平台3數學測驗成績')
+boxplot(prac3_en$testscore, ylim=c(0, 100), main='平台3英語測驗成績', cex.main=2.5, cex.axis=2)
+boxplot(prac3_ma$testscore, ylim=c(0, 100), main='平台3數學測驗成績', cex.main=2.5, cex.axis=2)
 dev.off()
 # ============================↑ picture1 (各平台測驗) ↑============================
 
 # ============================↓ picture2 (測驗者的大考成績) ↓============================
-png("chinese.png", width = 800, height = 600)
+png("pic/chinese.png", width = 800, height = 600)
 par(mfrow=c(1, 3))
-boxplot(user$chinese_score, ylim=c(0, 100), main='國語大考')
-boxplot(prac1_ch$finalscore, ylim=c(0, 100), main='平台1國語大考')
-boxplot(prac2_ch$finalscore, ylim=c(0, 100), main='平台2國語大考')
+boxplot(user$chinese_score, ylim=c(0, 100), main='國語大考', cex.main=3, cex.axis=2)
+boxplot(prac1_ch$finalscore, ylim=c(0, 100), main='平台1國語大考', cex.main=3, cex.axis=2)
+boxplot(prac2_ch$finalscore, ylim=c(0, 100), main='平台2國語大考', cex.main=3, cex.axis=2)
 dev.off()
 
-png("english.png", width = 800, height = 600)
+png("pic/english.png", width = 800, height = 600)
 par(mfrow=c(1, 4))
-boxplot(user$english_score, ylim=c(0, 100), main='英語大考')
-boxplot(prac1_en$finalscore, ylim=c(0, 100), main='平台1英語大考')
-boxplot(prac2_en$finalscore, ylim=c(0, 100), main='平台2英語大考')
-boxplot(prac3_en$finalscore, ylim=c(0, 100), main='平台3英語大考')
+boxplot(user$english_score, ylim=c(0, 100), main='英語大考', cex.main=2.5, cex.axis=2)
+boxplot(prac1_en$finalscore, ylim=c(0, 100), main='平台1英語大考', cex.main=2.5, cex.axis=2)
+boxplot(prac2_en$finalscore, ylim=c(0, 100), main='平台2英語大考', cex.main=2.5, cex.axis=2)
+boxplot(prac3_en$finalscore, ylim=c(0, 100), main='平台3英語大考', cex.main=2.5, cex.axis=2)
 dev.off()
 
-png("math.png", width = 800, height = 600)
+png("pic/math.png", width = 800, height = 600)
 par(mfrow=c(1, 3))
-boxplot(user$math_score, ylim=c(0, 100), main='數學大考')
-boxplot(prac1_ma$finalscore, ylim=c(0, 100), main='平台1數學大考')
-boxplot(prac3_ma$finalscore, ylim=c(0, 100), main='平台3數學大考')
+boxplot(user$math_score, ylim=c(0, 100), main='數學大考', cex.main=3, cex.axis=2)
+boxplot(prac1_ma$finalscore, ylim=c(0, 100), main='平台1數學大考', cex.main=3, cex.axis=2)
+boxplot(prac3_ma$finalscore, ylim=c(0, 100), main='平台3數學大考', cex.main=3, cex.axis=2)
 dev.off()
 # ============================↑ picture2 (測驗者的大考成績) ↑============================
 
@@ -193,22 +193,43 @@ df = user[user$user_sn %in% video$user_sn, c('user_sn', 'math_score')]
 video_ma = merge(video, df, by='user_sn') ## dp1影片，觀看數學影片次數、時長、大考成績
 
 # ============================↓ picture3 (成績-時長、成績-次數圖) ↓============================
-png("chinese_learningTimeCount.png", width = 800, height = 600)
-par(mfrow=c(1, 2))
-plot(video_ch$learningmean, video_ch$chinese_score)
-plot(video_ch$counts, video_ch$chinese_score)
+png("pic/chinese_learningTimeCount.png", width = 800, height = 600)
+par(mfrow=c(1, 2), mar=c(5.1, 6, 4.1, 2.1))
+plot(video_ch$learningmean, video_ch$chinese_score, 
+     main='成績-觀看時間', xlab='觀看時間(s)', ylab='國語大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.5)
+lines(lowess(video_ch$learningmean, video_ch$chinese_score), col='red', lwd=2, lty=1)
+
+plot(video_ch$counts, video_ch$chinese_score,
+     main='成績-觀看次數', xlab='觀看次數', ylab='國語大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.5)
+lines(lowess(video_ch$counts, video_ch$chinese_score), col='red', lwd=2, lty=1)
 dev.off()
 
-png("english_learningTimeCount.png", width = 800, height = 600)
-par(mfrow=c(1, 2))
-plot(video_en$learningmean, video_en$english_score)
-plot(video_en$counts, video_en$english_score)
+png("pic/english_learningTimeCount.png", width = 800, height = 600)
+par(mfrow=c(1, 2), mar=c(5.1, 6, 4.1, 2.1))
+plot(video_en$learningmean, video_en$english_score,
+     main='成績-觀看時間', xlab='觀看時間(s)', ylab='英語大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.5)
+lines(lowess(video_en$learningmean, video_en$english_score), col='red', lwd=2, lty=1)
+
+plot(video_en$counts, video_en$english_score,
+     main='成績-觀看次數', xlab='觀看次數', ylab='英語大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.5)
+lines(lowess(video_en$counts, video_en$english_score, f=.8), col='red', lwd=2, lty=1)
 dev.off()
 
-png("math_learningTimeCount.png", width = 800, height = 600)
-par(mfrow=c(1, 2))
-plot(video_ma$learningmean, video_ma$math_score)
-plot(video_ma$counts, video_ma$math_score)
+png("pic/math_learningTimeCount.png", width = 800, height = 600)
+par(mfrow=c(1, 2), mar=c(5.1, 6, 4.1, 2.1))
+plot(video_ma$learningmean, video_ma$math_score,
+     main='成績-觀看次數', xlab='觀看時間(s)', ylab='數學大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.3)
+lines(lowess(video_ma$learningmean, video_ma$math_score), col='red', lwd=2, lty=1)
+
+plot(video_ma$counts, video_ma$math_score,
+     main='成績-觀看次數', xlab='觀看次數', ylab='數學大考成績',
+     cex.main=2.5, cex.lab=2, cex.axis=1.3)
+lines(lowess(video_ma$counts, video_ma$math_score), col='red', lwd=2, lty=1)
 dev.off()
 # ============================↑ picture3 (成績-時長、成績-次數圖) ↑============================
 
