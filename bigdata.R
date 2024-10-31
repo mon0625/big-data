@@ -361,14 +361,22 @@ Test1 = rbind(df1_ma_test_1, df1_ma_test_0)   # dp1和dp3有、沒有交集的�
 model1_lm = lm(finalscore ~ testscore+learningmean+indp3, data=Train)
 # summary(model1)
 Train$predict_lm = predict(model1_lm) 
-mse_lm = mean((Train$predict-Train$finalscore)^2)
+mse_lm = mean((Train$predict_lm-Train$finalscore)^2)
 mse_lm
 
+Test1$predict_lm = predict(model1_lm, newdata=Test1) 
+mse_lm = mean((Test1$predict_lm-Test1$finalscore)^2)
+mse_lm
+
+mae_lm = mean(abs(Test1$predict_lm-Test1$finalscore))
+mae_lm
+
 # knn
-model2_knn = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=7)
+model2_knn = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9)
 # summary(model2_knn)
-Train$predict_knn = fitted(model2_knn)
-mse_knn = mean((Train$predict_knn-Train$finalscore)^2)
+Test1$predict_knn = fitted(model2_knn)
+mse_knn = mean((Test1$predict_knn-Test1$finalscore)^2)
+mse_knn
 
-
-
+mae_knn = mean(abs(Test1$predict_knn-Test1$finalscore))
+mae_knn
