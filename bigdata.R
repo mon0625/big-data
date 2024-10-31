@@ -222,7 +222,7 @@ dev.off()
 png("pic/math_learningTimeCount.png", width = 800, height = 600)
 par(mfrow=c(1, 2), mar=c(5.1, 6, 4.1, 2.1))
 plot(video_ma$learningmean, video_ma$math_score,
-     main='成績-觀看次數', xlab='觀看時間(s)', ylab='數學大考成績',
+     main='成績-觀看時間', xlab='觀看時間(s)', ylab='數學大考成績',
      cex.main=2.5, cex.lab=2, cex.axis=1.3)
 lines(lowess(video_ma$learningmean, video_ma$math_score), col='red', lwd=2, lty=1)
 
