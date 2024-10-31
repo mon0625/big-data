@@ -342,12 +342,12 @@ sum(video_en$indp23)
 ### ↑ 交集處理 ↑ ###
 
 # 建模
-df1_ma1 = df1_ma_TandV[df1_ma_TandV$indp3==1, ] # dp1, dp3交集
+df1_ma1 = df1_ma_PV[df1_ma_PV$indp3==1, ] # dp1, dp3交集
 s = sample(1:nrow(df1_ma1), 6)
 df1_ma_train_1 = df1_ma1[s, ] # 有交集train
 df1_ma_test_1 = df1_ma1[-s, ] # 有交集test
 
-df1_ma0 = df1_ma_TandV[df1_ma_TandV$indp3==0, ] # dp1, dp3沒交集
+df1_ma0 = df1_ma_PV[df1_ma_PV$indp3==0, ] # dp1, dp3沒交集
 s = sample(1:nrow(df1_ma0), 23)
 df1_ma_train_0 = df1_ma0[s, ] # 沒交集train
 df1_ma_test_0 = df1_ma0[-s, ] # 沒交集test
