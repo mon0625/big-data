@@ -1,5 +1,6 @@
 library(dplyr)
 library(kknn)
+library(mice)
 user = read.csv('user_data.csv')
 dp1_exam = read.csv('dp001_exam.csv')
 dp1_prac = read.csv('dp001_prac.csv')
@@ -358,7 +359,7 @@ sum(video_en$indp23)
 ### ↑ 交集處理 ↑ ###
 
 # 建模
-# df1_ma_PV3[is.na(df1_ma_PV3)]=0
+# df1_ma_PV3[is.na(df1_ma_PV3)] = 0
 set.seed(1)
 df1_ma1 = df1_ma_PV3[df1_ma_PV3$indp3==1, ] # dp1, dp3交集
 s = sample(1:nrow(df1_ma1), 6)
@@ -369,84 +370,127 @@ df1_ma0 = df1_ma_PV3[df1_ma_PV3$indp3==0, ] # dp1, dp3沒交集
 s = sample(1:nrow(df1_ma0), 23)
 df1_ma_train_0 = df1_ma0[s, ] # 沒交集train
 df1_ma_test_0 = df1_ma0[-s, ] # 沒交集test
-Train = rbind(df1_ma_train_1, df1_ma_train_0) # dp1和dp3有、沒有交集的訓練集之組合
-Test1 = rbind(df1_ma_test_1, df1_ma_test_0)   # dp1和dp3有、沒有交集的測試集之組合
-# Test2 = Test1+只有dp3，但是有資料缺失項
 
-### model:
-model.lm = lm(finalscore.x ~ testscore3+testcount3+learningmean+indp3, data=Train)
+# df Train、Test 原始
+Train = rbind(df1_ma_train_1, df1_ma_train_0)
+Test = rbind(df1_ma_test_1, df1_ma_test_0)
 
-kk = 1
-model.knn = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk)
-model.k1re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+# df Train、Test 全標準化
+Train = as.data.frame(scale(rbind(df1_ma_train_1, df1_ma_train_0))) # dp1和dp3有、沒有交集的訓練集之組合
+Test = as.data.frame(scale(rbind(df1_ma_test_1, df1_ma_test_0)))   # dp1和dp3有、沒有交集的測試集之組合
+
+# df Train、Test 只標準化 X
+Tr = rbind(df1_ma_train_1, df1_ma_train_0)
+Te = rbind(df1_ma_test_1, df1_ma_test_0)
+Train$finalscore.x = Tr$finalscore.x
+Test$finalscore.x = Te1$finalscore.x
+
+# df Test + dp3_ma_no1PV
+df.a = as.data.frame(scale(df3_ma_no1PV))
+colname = c("user_sn", "testscore", "testcount", "finalscore")
+colnames(df.a) = colname
+df.b = as.data.frame(scale(Test[ , c("user_sn", "testscore1", "testcount1", "finalscore.x")]))
+colnames(df.b) = colname
+Test = rbind(df.a, df.b)
+
+# df mice 
+# 1. 差補
+my_imp = mice(Train, m=5, method=c("","","","","","","pmm","pmm","pmm",""), maxit=5)
+a = complete(my_imp, 5)
+
+m2=with(my_imp,lm(finalscore.x ~ testscore1+testscore3+learningmean, data=Train))
+summary(pool(m2))
+
+# 2. 合併模型參數
+pooled_model <- pool(m2)
+
+# 3. 在測試集上進行預測
+# 使用每個插補模型在測試集上進行預測
+predictions_list <- lapply(complete(Train, "all"), function(data) {
+  model <- lm(finalscore.x ~ testscore1+testscore3+learningmean, data=Train)
+  predict(model, newdata = Test)
+})
+
+# 4. 合併預測結果（例如取均值）
+test_predictions <- rowMeans(do.call(cbind, predictions_list))
+# Test2 = Test+只有dp3，但是有資料缺失項
+
+### model1:
+model1.lm = lm(finalscore.x ~ testscore1+testcount1+learningmean+indp3, data=Train)
+
+kk = 5
+model.knn = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk)
+model.k1re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=1, kernel='rectangular')
-model.k1tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k1tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=1, kernel='triangular')
-model.k1ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k1ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=1, kernel='epanechnikov')
-model.k1ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k1ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=1, kernel='gaussian')
-model.k1op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k1op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=1, kernel='optimal')
-model.k2re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k2re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=2, kernel='rectangular')
-model.k2tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k2tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=2, kernel='triangular')
-model.k2ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k2ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=2, kernel='epanechnikov')
-model.k2ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k2ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=2, kernel='gaussian')
-model.k2op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
+model.k2op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test, k=kk,
                   distance=2, kernel='optimal')
 
-Test1$pre.lm = predict(model.lm, newdata=Test1)
-Test1$pre.knn = fitted(model.knn)
-Test1$pre.k1re = fitted(model.k1re)
-Test1$pre.k1tr = fitted(model.k1tr)
-Test1$pre.k1ep = fitted(model.k1ep)
-Test1$pre.k1ga = fitted(model.k1ga)
-Test1$pre.k1op = fitted(model.k1op)
-Test1$pre.k2re = fitted(model.k2re)
-Test1$pre.k2tr = fitted(model.k2tr)
-Test1$pre.k2ep = fitted(model.k2ep)
-Test1$pre.k2ga = fitted(model.k2ga)
-Test1$pre.k2op = fitted(model.k2op)
+Test$pre.lm = predict(model1.lm, newdata=Test)
+Test$pre.knn = fitted(model.knn)
+Test$pre.k1re = fitted(model.k1re)
+Test$pre.k1tr = fitted(model.k1tr)
+Test$pre.k1ep = fitted(model.k1ep)
+Test$pre.k1ga = fitted(model.k1ga)
+Test$pre.k1op = fitted(model.k1op)
+Test$pre.k2re = fitted(model.k2re)
+Test$pre.k2tr = fitted(model.k2tr)
+Test$pre.k2ep = fitted(model.k2ep)
+Test$pre.k2ga = fitted(model.k2ga)
+Test$pre.k2op = fitted(model.k2op)
 
-cat('MSE.ml : ', mean((Test1$pre.lm-Test1$finalscore)^2), '\n')
-cat('MAE.ml : ', mean(abs(Test1$pre.lm-Test1$finalscore)), '\n')
+cat('MSE.ml : ', mean((Test$pre.lm-Test$finalscore.x)^2), '\n')
+cat('MAE.ml : ', mean(abs(Test$pre.lm-Test$finalscore.x)), '\n')
+summary(model1.lm)
 
-cat('MSE.knn : ', mean((Test1$pre.knn-Test1$finalscore)^2), '\n')
-cat('MAE.knn : ', mean(abs(Test1$pre.knn-Test1$finalscore)), '\n')
+cat('MSE.knn : ', mean((Test$pre.knn-Test$finalscore.x)^2), '\n')
+cat('MAE.knn : ', mean(abs(Test$pre.knn-Test$finalscore.x)), '\n')
+plot(model.knn)
 
-cat('MSE.k1re : ', mean((Test1$pre.k1re-Test1$finalscore)^2), '\n')
-cat('MAE.k1re : ', mean(abs(Test1$pre.k1re-Test1$finalscore)), '\n')
+cat('MSE.k1re : ', mean((Test$pre.k1re-Test$finalscore.x)^2), '\n')
+cat('MAE.k1re : ', mean(abs(Test$pre.k1re-Test$finalscore.x)), '\n')
 
-cat('MSE.k1tr : ', mean((Test1$pre.k1tr-Test1$finalscore)^2), '\n')
-cat('MAE.k1tr : ', mean(abs(Test1$pre.k1tr-Test1$finalscore)), '\n')
+cat('MSE.k1tr : ', mean((Test$pre.k1tr-Test$finalscore.x)^2), '\n')
+cat('MAE.k1tr : ', mean(abs(Test$pre.k1tr-Test$finalscore.x)), '\n')
 
-cat('MSE.k1ep : ', mean((Test1$pre.k1ep-Test1$finalscore)^2), '\n')
-cat('MAE.k1ep : ', mean(abs(Test1$pre.k1ep-Test1$finalscore)), '\n')
+cat('MSE.k1ep : ', mean((Test$pre.k1ep-Test$finalscore.x)^2), '\n')
+cat('MAE.k1ep : ', mean(abs(Test$pre.k1ep-Test$finalscore.x)), '\n')
 
-cat('MSE.k1ga : ', mean((Test1$pre.k1ga-Test1$finalscore)^2), '\n')
-cat('MAE.k1ga : ', mean(abs(Test1$pre.k1ga-Test1$finalscore)), '\n')
+cat('MSE.k1ga : ', mean((Test$pre.k1ga-Test$finalscore.x)^2), '\n')
+cat('MAE.k1ga : ', mean(abs(Test$pre.k1ga-Test$finalscore.x)), '\n')
 
-cat('MSE.k1op : ', mean((Test1$pre.k1op-Test1$finalscore)^2), '\n')
-cat('MAE.k1op : ', mean(abs(Test1$pre.k1op-Test1$finalscore)), '\n')
+cat('MSE.k1op : ', mean((Test$pre.k1op-Test$finalscore.x)^2), '\n')
+cat('MAE.k1op : ', mean(abs(Test$pre.k1op-Test$finalscore.x)), '\n')
 
-cat('MSE.k2re : ', mean((Test1$pre.k2re-Test1$finalscore)^2), '\n')
-cat('MAE.k2re : ', mean(abs(Test1$pre.k2re-Test1$finalscore)), '\n')
+cat('MSE.k2re : ', mean((Test$pre.k2re-Test$finalscore.x)^2), '\n')
+cat('MAE.k2re : ', mean(abs(Test$pre.k2re-Test$finalscore.x)), '\n')
 
-cat('MSE.k2tr : ', mean((Test1$pre.k2tr-Test1$finalscore)^2), '\n')
-cat('MAE.k2tr : ', mean(abs(Test1$pre.k2tr-Test1$finalscore)), '\n')
+cat('MSE.k2tr : ', mean((Test$pre.k2tr-Test$finalscore.x)^2), '\n')
+cat('MAE.k2tr : ', mean(abs(Test$pre.k2tr-Test$finalscore.x)), '\n')
 
-cat('MSE.k2ep : ', mean((Test1$pre.k2ep-Test1$finalscore)^2), '\n')
-cat('MAE.k2ep : ', mean(abs(Test1$pre.k2ep-Test1$finalscore)), '\n')
+cat('MSE.k2ep : ', mean((Test$pre.k2ep-Test$finalscore.x)^2), '\n')
+cat('MAE.k2ep : ', mean(abs(Test$pre.k2ep-Test$finalscore.x)), '\n')
 
-cat('MSE.k2ga : ', mean((Test1$pre.k2ga-Test1$finalscore)^2), '\n')
-cat('MAE.k2ga : ', mean(abs(Test1$pre.k2ga-Test1$finalscore)), '\n')
+cat('MSE.k2ga : ', mean((Test$pre.k2ga-Test$finalscore.x)^2), '\n')
+cat('MAE.k2ga : ', mean(abs(Test$pre.k2ga-Test$finalscore.x)), '\n')
 
-cat('MSE.k2op : ', mean((Test1$pre.k2op-Test1$finalscore)^2), '\n')
-cat('MAE.k2op : ', mean(abs(Test1$pre.k2op-Test1$finalscore)), '\n')
+cat('MSE.k2op : ', mean((Test$pre.k2op-Test$finalscore.x)^2), '\n')
+cat('MAE.k2op : ', mean(abs(Test$pre.k2op-Test$finalscore.x)), '\n')
 
 
 
