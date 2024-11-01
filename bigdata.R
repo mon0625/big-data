@@ -18,17 +18,24 @@ dp1_prac_ma = dp1_prac[grep('數學', dp1_prac$subject_name), ]   # dp1測驗，
 dp1_rate_ch = c() # dp1，國語測驗成績
 dp1_rate_en = c() # dp1，英語測驗成績
 dp1_rate_ma = c() # dp1，數學測驗成績
+
+dp1_count_ch = c() # dp1，國語測驗次數
+dp1_count_en = c() # dp1，英語測驗次數
+dp1_count_ma = c() # dp1，數學測驗次數
 i = 1
 for(p in user$user_sn){
   dp1_rate_ch[i] = mean(dp1_prac_ch[dp1_prac_ch$user_sn==p, 'score_rate'])
   dp1_rate_en[i] = mean(dp1_prac_en[dp1_prac_en$user_sn==p, 'score_rate'])
   dp1_rate_ma[i] = mean(dp1_prac_ma[dp1_prac_ma$user_sn==p, 'score_rate'])
+  dp1_count_ch[i] = length(dp1_prac_ch[dp1_prac_ch$user_sn==p, 'score_rate'])
+  dp1_count_en[i] = length(dp1_prac_en[dp1_prac_en$user_sn==p, 'score_rate'])
+  dp1_count_ma[i] = length(dp1_prac_ma[dp1_prac_ma$user_sn==p, 'score_rate'])
   i = i+1
 }
 
-prac1_ch = data.frame(user_sn=user$user_sn, testscore=dp1_rate_ch) %>% na.omit()
-prac1_en = data.frame(user_sn=user$user_sn, testscore=dp1_rate_en) %>% na.omit()
-prac1_ma = data.frame(user_sn=user$user_sn, testscore=dp1_rate_ma) %>% na.omit()
+prac1_ch = data.frame(user_sn=user$user_sn, testscore1=dp1_rate_ch, testcount1=dp1_count_ch) %>% na.omit()
+prac1_en = data.frame(user_sn=user$user_sn, testscore1=dp1_rate_en, testcount1=dp1_count_en) %>% na.omit()
+prac1_ma = data.frame(user_sn=user$user_sn, testscore1=dp1_rate_ma, testcount1=dp1_count_ma) %>% na.omit()
 
 # dp2 測驗 [國語, 英語]=[42, 15]
 dp2_rate_ch = c() # dp2，國語測驗成績
@@ -42,23 +49,27 @@ for(p in user$user_sn){
   i = i+1
 }
 
-prac2_ch = data.frame(user_sn=user$user_sn, testscore=dp2_rate_ch) %>% na.omit()
-prac2_en = data.frame(user_sn=user$user_sn, testscore=dp2_rate_en) %>% na.omit()
+prac2_ch = data.frame(user_sn=user$user_sn, testscore2=dp2_rate_ch) %>% na.omit()
+prac2_en = data.frame(user_sn=user$user_sn, testscore2=dp2_rate_en) %>% na.omit()
 
 # dp3 測驗 [英語, 數學]=[12, 24]
 dp3_rate_en = c() # dp3，英語測驗成績
 dp3_rate_ma = c() # dp3，數學測驗成績
+dp3_count_en = c() # dp3，英語測驗次數
+dp3_count_ma = c() # dp3，數學測驗次數
 i = 1
 for(p in user$user_sn){
   tem = as.numeric(as.logical(dp3_word[dp3_word$user_sn==p, 'is_correct']))
   dp3_rate_en[i] = (sum(tem)/length(tem))*100
+  dp3_count_en[i] = length(tem)
   tem = as.numeric(as.logical(dp3_math[dp3_math$user_sn==p, 'is_correct']))
   dp3_rate_ma[i] = (sum(tem)/length(tem))*100
+  dp3_count_ma[i] = length(tem)
   i = i+1
 }
 
-prac3_en = data.frame(user_sn=user$user_sn, testscore=dp3_rate_en) %>% na.omit()
-prac3_ma = data.frame(user_sn=user$user_sn, testscore=dp3_rate_ma) %>% na.omit()
+prac3_en = data.frame(user_sn=user$user_sn, testscore3=dp3_rate_en, testcount3=dp3_count_en) %>% na.omit()
+prac3_ma = data.frame(user_sn=user$user_sn, testscore3=dp3_rate_ma, testcount3=dp3_count_ma) %>% na.omit()
 
 # 國語 dp1, dp2 在大考的成績
 prac1_ch$finalscore = user[user$user_sn %in% prac1_ch$user_sn, 'chinese_score'] ## dp1，有國語測驗的[測驗、大考]成績
@@ -130,7 +141,7 @@ meanlen = function(df){
 # 國語 [16]
 review_ch = dp1_review[grep('國語文', dp1_review$subject_name), ] # dp1影片，只有國語資料
 video = data.frame(table(review_ch$user_sn))                      
-colnames(video) = c('user_sn', 'counts')
+colnames(video) = c('user_sn', 'videocounts')
 review_ch$learningtime = as.POSIXct(review_ch$end_time)-as.POSIXct(review_ch$start_time)
 
 review_ch$stime = format(as.POSIXlt(review_ch$start_time), "%Y%m%d")
@@ -152,7 +163,7 @@ video_ch = merge(video, df, by='user_sn') ## dp1影片，觀看國語影片次�
 # 英語 [7]
 review_en = dp1_review[grep('英語', dp1_review$subject_name), ]
 video = data.frame(table(review_en$user_sn))
-colnames(video) = c('user_sn', 'counts')
+colnames(video) = c('user_sn', 'videocounts')
 review_en$learningtime = as.POSIXct(review_en$end_time)-as.POSIXct(review_en$start_time)
 
 review_en$stime = format(as.POSIXlt(review_en$start_time), "%Y%m%d")
@@ -174,7 +185,7 @@ video_en = merge(video, df, by='user_sn') ## dp1影片，觀看英語影片次�
 # 數學 [57]
 review_ma = dp1_review[grep('數學', dp1_review$subject_name), ]
 video = data.frame(table(review_ma$user_sn))
-colnames(video) = c('user_sn', 'counts')
+colnames(video) = c('user_sn', 'videocounts')
 review_ma$learningtime = as.POSIXct(review_ma$end_time)-as.POSIXct(review_ma$start_time)
 
 review_ma$stime = format(as.POSIXlt(review_ma$start_time), "%Y%m%d")
@@ -238,12 +249,13 @@ dev.off()
 ## 數學 [dp1_prac, dp1_review, dp3]=[58, 57, 24] ↓============================
 #(dp1) 數學 [測驗]且[影片] [57]
 df1_ma_PV = merge(prac1_ma, video_ma, by='user_sn', all=FALSE)
-df1_ma_PV = df1_ma_PV[ , -grep('math_score', colnames(df1_ma_PV))]
+df1_ma_PV = df1_ma_PV[ , -c(grep('math_score', colnames(df1_ma_PV)))]
 nrow(df1_ma_PV)
 
 # (dp1, dp3) 數學 [dp1測驗且影片]且[dp3] [11]
-df1_ma_PV$indp3 = ifelse(df1_ma_PV$user_sn %in% prac3_ma$user_sn, 1, 0)
-sum(df1_ma_PV$indp3)
+df1_ma_PV3 = merge(df1_ma_PV, prac3_ma, by='user_sn', all.x=TRUE)
+df1_ma_PV3$indp3 = ifelse(df1_ma_PV3$user_sn %in% prac3_ma$user_sn, 1, 0)
+sum(df1_ma_PV3$indp3)
 
 # (dp1, dp3) 數學 [dp3]/[dp1測驗且影片] [13]
 df3_ma_no1PV = prac3_ma[!prac3_ma$user_sn %in% df1_ma_PV$user_sn, ]
@@ -260,12 +272,13 @@ nrow(df1_ma_V3)
 ## 國語 [dp1_prac, dp1_review, dp2]=[41, 16, 42] ↓============================
 # (dp1) 國語 [測驗且影片] [10]
 df1_ch_PV = merge(prac1_ch, video_ch, by='user_sn', all=FALSE)
-df1_ch_PV = df1_ch_PV[ , -grep('chinese_score', colnames(df1_ch_PV))]
+df1_ch_PV = df1_ch_PV[ , -c(grep('chinese_score', colnames(df1_ch_PV)))]
 nrow(df1_ch_PV)
 
 # (dp1, dp2) 國語 [dp1測驗且影片]且[dp2] [1]
-df1_ch_PV$indp2 = ifelse(df1_ch_PV$user_sn %in% prac2_ch$user_sn, 1, 0)
-sum(df1_ch_PV$indp2)
+df1_ch_PV2 = merge(df1_ch_PV, prac2_ch, by='user_sn', all.x=TRUE)
+df1_ch_PV2$indp2 = ifelse(df1_ch_PV$user_sn %in% prac2_ch$user_sn, 1, 0)
+sum(df1_ch_PV2$indp2)
 
 # (dp1, dp2) 國語 [dp2]/[dp1測驗且影片] [12]
 df2_ch_no1PV = prac2_ch[!prac2_ch$user_sn %in% df1_ch_PV$user_sn, ]
@@ -282,13 +295,14 @@ nrow(df1_ch_V2)
 ## 英語 [dp1_prac, dp1_review, dp2, dp3]=[8, 7, 15, 12] ↓============================
 # (dp1) 英語 [測驗且影片] [5]
 df1_en_PV = merge(prac1_en, video_en, by='user_sn', all=FALSE)
-df1_en_PV = df1_en_PV[ , -grep('english_score', colnames(df1_en_PV))]
+df1_en_PV = df1_en_PV[ , -c(grep('english_score', colnames(df1_en_PV)))]
 nrow(df1_en_PV)
 
 # ---------------------------↓ dp1, dp2 ↓---------------------------
 # (dp1, dp2) 英語 [dp1測驗且影片]且[dp2] [0]
-df1_en_PV$indp2 = ifelse(df1_en_PV$user_sn %in% prac2_en$user_sn, 1, 0)
-sum(df1_en_PV$indp2)
+df1_en_PV2 = merge(df1_en_PV, prac2_en, by='user_sn', all.x=TRUE)
+df1_en_PV2$indp2 = ifelse(df1_en_PV$user_sn %in% prac2_en$user_sn, 1, 0)
+sum(df1_en_PV2$indp2)
 
 # (dp1, dp2) 英語 [dp2]/[dp1測驗且影片] [15]
 df2_en_no1PV = prac2_en[!prac2_en$user_sn %in% df1_en_PV$user_sn, ]
@@ -305,8 +319,9 @@ sum(video_en$indp2)
 
 # ---------------------------↓ dp1, dp3 ↓---------------------------
 # (dp1, dp3) 英語 [dp1測驗且影片]且[dp3] [3]
-df1_en_PV$indp3 = ifelse(df1_en_PV$user_sn %in% prac3_en$user_sn, 1, 0)
-sum(df1_en_PV$indp3)
+df1_en_PV3 = merge(df1_en_PV, prac3_en, by='user_sn', all.x=TRUE)
+df1_en_PV3$indp3 = ifelse(df1_en_PV$user_sn %in% prac3_en$user_sn, 1, 0)
+sum(df1_en_PV3$indp3)
 
 # (dp1, dp3) 英語 [dp3]/[dp1測驗且影片] [9]
 df3_en_no1PV = prac3_en[!prac3_en$user_sn %in% df1_en_PV$user_sn, ]
@@ -343,13 +358,14 @@ sum(video_en$indp23)
 ### ↑ 交集處理 ↑ ###
 
 # 建模
+# df1_ma_PV3[is.na(df1_ma_PV3)]=0
 set.seed(1)
-df1_ma1 = df1_ma_PV[df1_ma_PV$indp3==1, ] # dp1, dp3交集
+df1_ma1 = df1_ma_PV3[df1_ma_PV3$indp3==1, ] # dp1, dp3交集
 s = sample(1:nrow(df1_ma1), 6)
 df1_ma_train_1 = df1_ma1[s, ] # 有交集train
 df1_ma_test_1 = df1_ma1[-s, ] # 有交集test
 
-df1_ma0 = df1_ma_PV[df1_ma_PV$indp3==0, ] # dp1, dp3沒交集
+df1_ma0 = df1_ma_PV3[df1_ma_PV3$indp3==0, ] # dp1, dp3沒交集
 s = sample(1:nrow(df1_ma0), 23)
 df1_ma_train_0 = df1_ma0[s, ] # 沒交集train
 df1_ma_test_0 = df1_ma0[-s, ] # 沒交集test
@@ -358,27 +374,29 @@ Test1 = rbind(df1_ma_test_1, df1_ma_test_0)   # dp1和dp3有、沒有交集的�
 # Test2 = Test1+只有dp3，但是有資料缺失項
 
 ### model:
-model.lm = lm(finalscore ~ testscore+learningmean+indp3, data=Train)
-model.knn = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9)
-model.k1re = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.lm = lm(finalscore.x ~ testscore3+testcount3+learningmean+indp3, data=Train)
+
+kk = 1
+model.knn = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk)
+model.k1re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=1, kernel='rectangular')
-model.k1tr = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k1tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=1, kernel='triangular')
-model.k1ep = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k1ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=1, kernel='epanechnikov')
-model.k1ga = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k1ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=1, kernel='gaussian')
-model.k1op = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k1op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=1, kernel='optimal')
-model.k2re = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k2re = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=2, kernel='rectangular')
-model.k2tr = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k2tr = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=2, kernel='triangular')
-model.k2ep = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k2ep = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=2, kernel='epanechnikov')
-model.k2ga = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k2ga = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=2, kernel='gaussian')
-model.k2op = kknn(finalscore ~ testscore+learningmean+indp3, train=Train, test=Test1, k=9,
+model.k2op = kknn(finalscore.x ~ testscore1+learningmean+indp3, train=Train, test=Test1, k=kk,
                   distance=2, kernel='optimal')
 
 Test1$pre.lm = predict(model.lm, newdata=Test1)
