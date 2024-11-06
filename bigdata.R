@@ -1,6 +1,6 @@
 library(dplyr)
-library(kknn)
-library(mice)
+# library(kknn)
+# library(mice)
 user = read.csv('user_data.csv')
 dp1_exam = read.csv('dp001_exam.csv')
 dp1_prac = read.csv('dp001_prac.csv')
@@ -113,30 +113,40 @@ dev.off()
 png("pic/chinese.png", width = 800, height = 600)
 par(mfrow=c(1, 3))
 boxplot(user$chinese_score, ylim=c(0, 100), main='國語大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(user$chinese_score), y1=mean(user$chinese_score), col="red", lwd=2)
 boxplot(prac1_ch$finalscore, ylim=c(0, 100), main='平台1國語大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac1_ch$finalscore), y1=mean(prac1_ch$finalscore), col="red", lwd=2)
 boxplot(prac2_ch$finalscore, ylim=c(0, 100), main='平台2國語大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac2_ch$finalscore), y1=mean(prac2_ch$finalscore), col="red", lwd=2)
 dev.off()
 
 png("pic/english.png", width = 800, height = 600)
 par(mfrow=c(1, 4))
 boxplot(user$english_score, ylim=c(0, 100), main='英語大考', cex.main=2.5, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(user$english_score), y1=mean(user$english_score), col="red", lwd=2)
 boxplot(prac1_en$finalscore, ylim=c(0, 100), main='平台1英語大考', cex.main=2.5, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac1_en$finalscore), y1=mean(prac1_en$finalscore), col="red", lwd=2)
 boxplot(prac2_en$finalscore, ylim=c(0, 100), main='平台2英語大考', cex.main=2.5, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac2_en$finalscore), y1=mean(prac2_en$finalscore), col="red", lwd=2)
 boxplot(prac3_en$finalscore, ylim=c(0, 100), main='平台3英語大考', cex.main=2.5, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac3_en$finalscore), y1=mean(prac3_en$finalscore), col="red", lwd=2)
 dev.off()
 
 png("pic/math.png", width = 800, height = 600)
 par(mfrow=c(1, 3))
 boxplot(user$math_score, ylim=c(0, 100), main='數學大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(user$math_score), y1=mean(user$math_score), col="red", lwd=2)
 boxplot(prac1_ma$finalscore, ylim=c(0, 100), main='平台1數學大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac1_ma$finalscore), y1=mean(prac1_ma$finalscore), col="red", lwd=2)
 boxplot(prac3_ma$finalscore, ylim=c(0, 100), main='平台3數學大考', cex.main=3, cex.axis=2)
+segments(x0=0.8, x1=1.2, y0=mean(prac3_ma$finalscore), y1=mean(prac3_ma$finalscore), col="red", lwd=2)
 dev.off()
 # ============================↑ picture2 (測驗者的大考成績) ↑============================
 
 ## dp1 影片時長(X2)、觀看次數, video
 meanlen = function(df){
   result = df %>% group_by(stime) %>% summarise(onedaylen=sum(learningtime))
-  return(sum(result$onedaylen)/nrow(result))
+  return(sum(result$onedaylen))
 }
 
 # 國語 [16]
@@ -157,7 +167,7 @@ for(p in video$user_sn){
   len[i] = meanlen(tem)
   i = i+1
 }
-video$learningmean = len
+video$videotime = len
 df = user[user$user_sn %in% video$user_sn, c('user_sn', 'chinese_score')]
 video_ch = merge(video, df, by='user_sn') ## dp1影片，觀看國語影片次數、時長、大考成績
 
@@ -179,7 +189,7 @@ for(p in video$user_sn){
   len[i] = meanlen(tem)
   i = i+1
 }
-video$learningmean = len
+video$videotime = len
 df = user[user$user_sn %in% video$user_sn, c('user_sn', 'english_score')]
 video_en = merge(video, df, by='user_sn') ## dp1影片，觀看英語影片次數、時長、大考成績
 
@@ -201,7 +211,7 @@ for(p in video$user_sn){
   len[i] = meanlen(tem)
   i = i+1
 }
-video$learningmean = len
+video$videotime = len
 df = user[user$user_sn %in% video$user_sn, c('user_sn', 'math_score')]
 video_ma = merge(video, df, by='user_sn') ## dp1影片，觀看數學影片次數、時長、大考成績
 
@@ -491,6 +501,79 @@ cat('MAE.k2ga : ', mean(abs(Test$pre.k2ga-Test$finalscore.x)), '\n')
 
 cat('MSE.k2op : ', mean((Test$pre.k2op-Test$finalscore.x)^2), '\n')
 cat('MAE.k2op : ', mean(abs(Test$pre.k2op-Test$finalscore.x)), '\n')
+
+
+# 建模1106
+# dp1-ma
+model1_ma = lm(finalscore~testscore1, data=prac1_ma)
+summary(model1_ma)
+
+model2_ma = lm(finalscore~testcount1, data=prac1_ma)
+summary(model2_ma)
+
+model3_ma = lm(math_score~learningmean, data=video_ma)
+summary(model3_ma)
+
+model4_ma = lm(math_score~videotime, data=video_ma)
+summary(model4_ma)
+
+# dp3-ma
+model5_ma = lm(finalscore~testscore3, data=prac3_ma)
+summary(model5_ma)
+
+model6_ma = lm(finalscore~testcount3, data=prac3_ma)
+summary(model6_ma)
+
+# dp1-ch
+model1_ch = lm(finalscore~testscore1, data=prac1_ch)
+summary(model1_ch)
+
+model2_ch = lm(finalscore~testcount1, data=prac1_ch)
+summary(model2_ch)
+
+model3_ch = lm(chinese_score~learningmean, data=video_ch)
+summary(model3_ch)
+
+model4_ch = lm(chinese_score~videotime, data=video_ch)
+summary(model4_ch)
+
+# dp2-ch 
+model5_ch = lm(finalscore~testscore2, data=prac2_ch)
+summary(model5_ch)
+
+# dp1-en 
+model1_en = lm(finalscore~testscore1, data=prac1_en)
+summary(model1_en)
+
+model2_en = lm(finalscore~testcount1, data=prac1_en)
+summary(model2_en)
+
+model3_en = lm(english_score~learningmean, data=video_en)
+summary(model3_en)
+
+model4_en = lm(english_score~videotime, data=video_en)
+summary(model4_en)
+
+# dp2-en
+model5_en = lm(finalscore~testscore2, data=prac2_en)
+summary(model5_en)
+
+# dp3-en
+model6_en = lm(finalscore~testscore3, data=prac3_en)
+summary(model6_en)
+
+model7_en = lm(finalscore~testcount3, data=prac3_en)
+summary(model7_en)
+
+
+# t-test
+mu1 = video_en$english_score
+mu2 = user[!user$user_sn %in% video_en$user_sn, 'english_score']
+t.test(mu1, mu2, alternative='greater')
+t.test(mu1, mu2)
+
+
+
 
 
 
